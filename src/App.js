@@ -87,13 +87,13 @@ function Register() {
 // Verify OTP Page
 function VerifyOtp() {
   const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false); // loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "";
 
   const handleVerify = async () => {
-    setLoading(true); // start loading
+    setLoading(true);
     try {
       const response = await fetch(
         `https://employee-repo.onrender.com/employee-management/authenticate-otp?otp=${otp}&email=${email}`,
@@ -102,10 +102,11 @@ function VerifyOtp() {
           headers: { "Content-Type": "application/json" },
         }
       );
+
       if (response.ok) {
-        const text = await response.text();
-        if (text === "Authenticated") {
-          navigate("/success", { state: { email } });
+        const employee = await response.json(); // parse JSON Employee object
+        if (employee?.email) {
+          navigate("/success", { state: employee }); // pass full employee object
         } else {
           alert("Invalid OTP");
         }
@@ -116,7 +117,7 @@ function VerifyOtp() {
       console.error(error);
       alert("Error verifying OTP");
     } finally {
-      setLoading(false); // stop loading
+      setLoading(false);
     }
   };
 
@@ -139,19 +140,20 @@ function VerifyOtp() {
 // Success Page
 function Success() {
   const location = useLocation();
-  const data = location.state;
+  const employee = location.state; // full Employee object from backend
+
   return (
     <div className="container">
       <h2>Registration Successful</h2>
       <div className="details">
         <p>
-          <strong>Name:</strong> {data?.name}
+          <strong>Name:</strong> {employee?.name}
         </p>
         <p>
-          <strong>Email:</strong> {data?.email}
+          <strong>Email:</strong> {employee?.email}
         </p>
         <p>
-          <strong>Phone Number:</strong> {data?.phoneNumber}
+          <strong>Phone Number:</strong> {employee?.phoneNumber}
         </p>
       </div>
     </div>
